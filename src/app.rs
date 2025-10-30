@@ -56,7 +56,7 @@ pub unsafe fn run() {
                     ren::update_scale();
                 },
                 events::SDL_EVENT_KEY_DOWN | events::SDL_EVENT_KEY_UP => {
-                    if ev.key.scancode == scancode::SDL_SCANCODE_ESCAPE {
+                    if ev.key.scancode == scancode::SDL_SCANCODE_ESCAPE && !ev.key.down {
                         match &a().scene {
                             SceneBase::Menu(_) => {
                                 a().running = false;

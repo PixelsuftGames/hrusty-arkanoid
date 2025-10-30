@@ -1,6 +1,6 @@
 use core::ffi::c_void;
 use sdl3_sys::{properties, render, surface};
-use crate::{col::Color, cs, deb, error, fatal, hrust::last_error, rect::Point, surf, warn, win};
+use crate::{col::Color, deb, error, fatal, hrust::last_error, rect::Point, surf, warn, win};
 
 pub static mut handle: *mut render::SDL_Renderer = core::ptr::null_mut();
 
@@ -54,6 +54,10 @@ impl Tex {
         render::SDL_SetTextureColorModFloat(self.handle, col.r, col.g, col.b);
     }
 
+    pub unsafe fn alpha(&mut self, alpha: f32) {
+        render::SDL_SetTextureAlphaModFloat(self.handle, alpha);
+    }
+
     pub unsafe fn destroy(&mut self) {
         if self.handle.is_null() {
             panic!("Double free");
@@ -67,8 +71,7 @@ pub unsafe fn create() -> Option<RenContext> {
     let props = properties::SDL_CreateProperties();
     properties::SDL_SetPointerProperty(props, render::SDL_PROP_RENDERER_CREATE_WINDOW_POINTER, win::handle as *mut c_void);
     properties::SDL_SetNumberProperty(props, render::SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER, 1);
-    // TODO: remove later
-    properties::SDL_SetStringProperty(props, render::SDL_PROP_RENDERER_CREATE_NAME_STRING, cs!("direct3d"));
+    // properties::SDL_SetStringProperty(props, render::SDL_PROP_RENDERER_CREATE_NAME_STRING, cs!("direct3d"));
     handle = render::SDL_CreateRendererWithProperties(props);
     if handle.is_null() {
         fatal!("Failed to create renderer (%s)", last_error());

@@ -1,4 +1,4 @@
-use crate::{app, col::Color, ldr, rect::{Point, Rect}, ren, scene_base::Event};
+use crate::{app, col::Color, ldr, rect::{Point, Rect}, ren, scene_base::{self, Event}};
 
 const BRICK_COLS: i32 = 10;
 const BRICK_ROWS: i32 = 5;
@@ -78,7 +78,6 @@ impl Entity for Brick {
                 ball.cur_state.velocity.y = 0.0000001f32;
                 ball.cur_state.rect.x = 1000f32;
                 ball.cur_state.rect.y = 1000f32;
-                panic!("TODO: dead");
             }
         }
         else if self.rect.w == 100f32 {
@@ -285,6 +284,9 @@ impl SceneGame {
         self.paddle.sync();
         for brick in self.bricks.iter_mut() {
             brick.sync();
+        }
+        if self.ball.cur_state.hp == 0 {
+            app::run_scene(scene_base::SceneBase::new_menu());
         }
     }
 
