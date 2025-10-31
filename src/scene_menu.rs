@@ -6,7 +6,9 @@ pub struct SceneMenu {
 }
 
 impl SceneMenu {
-    pub unsafe fn init(&mut self) {}
+    pub unsafe fn init(&mut self) {
+        self.space_timer = 0f32;
+    }
 
     pub unsafe fn update(&mut self, dt: f32) {
         self.space_timer += dt * 5f32;

@@ -119,7 +119,6 @@ impl Entity for Paddle {
 
     unsafe fn do_move(&mut self, dt: f32) {
         self.new_state = self.cur_state;
-        self.new_state.rect.x += self.cur_state.velocity.x * dt / 2f32;
         // self.new_state.rect.y += self.cur_state.velocity.y * dt / 2f32;
         if self.holding == 0 {
             if self.new_state.velocity.x >= 0f32 {
@@ -129,11 +128,21 @@ impl Entity for Paddle {
                 self.new_state.velocity.x += 50f32 * dt;
             }
         }
-        else {
+        else if self.new_state.velocity.x.abs() < 350f32 {
             self.new_state.velocity.x += dt * self.holding as f32 * 500f32;
+            // accurately clamp values
+            if self.new_state.velocity.x.abs() > 350f32 {
+                let extra_time = (self.new_state.velocity.x.abs() - 350f32) / dt / 500f32;
+                self.new_state.velocity.x = 350f32 * self.new_state.velocity.x.signum();
+                self.new_state.rect.x += self.cur_state.velocity.x * (dt - extra_time) / 2f32;
+                self.new_state.rect.x += self.new_state.velocity.x * (dt - extra_time) / 2f32;
+                self.new_state.rect.x += self.new_state.velocity.x * extra_time;
+                self.new_state.rect.x = self.new_state.rect.x.min(800f32 - self.cur_state.rect.w).max(0f32);
+                return;
+            }
         }
-        self.new_state.velocity.x = self.new_state.velocity.x.min(350f32).max(-350f32);
         self.new_state.rect.x += self.cur_state.velocity.x * dt / 2f32;
+        self.new_state.rect.x += self.new_state.velocity.x * dt / 2f32;
         self.new_state.rect.x = self.new_state.rect.x.min(800f32 - self.cur_state.rect.w).max(0f32);
         // self.new_state.rect.y += self.cur_state.velocity.y * dt / 2f32;
     }
@@ -224,10 +233,8 @@ impl SceneGame {
         self.bricks[(BRICK_COLS * BRICK_ROWS + 2) as usize].rect = Rect::new(800f32, -100f32, 100f32, 800f32);
         // bottom (deadly)
         self.bricks[(BRICK_COLS * BRICK_ROWS + 3) as usize].rect = Rect::new(-100f32, 600f32, 1000f32, 100f32);
-        self.paddle.cur_state.rect = Rect::new(368f32, 558f32, 64f32, 32f32);
-        self.ball.cur_state.rect = Rect::new(388f32, 524f32, 24f32, 24f32);
+        self.reset_attempt();
         self.ball.cur_state.hp = 3;
-        self.ball.cur_state.velocity = Point::empty();
     }
 
     pub unsafe fn update(&mut self, orig_dt: f32) {
@@ -238,6 +245,7 @@ impl SceneGame {
         }
         let mut done = true;
         let mut dt_left = dt;
+        let prev_hp = self.ball.cur_state.hp;
         while dt_left > 0f32 {
             let mut min_col_t = dt_left;
             #[allow(invalid_value)]
@@ -285,8 +293,13 @@ impl SceneGame {
         for brick in self.bricks.iter_mut() {
             brick.sync();
         }
-        if self.ball.cur_state.hp == 0 {
-            app::run_scene(scene_base::SceneBase::new_menu());
+        if prev_hp != self.ball.cur_state.hp {
+            if self.ball.cur_state.hp == 0 {
+                app::run_scene(scene_base::SceneBase::new_menu());
+            }
+            else {
+                self.reset_attempt();
+            }
         }
     }
 
@@ -332,6 +345,13 @@ impl SceneGame {
         }        
         self.ball.draw();
         ren::present();
+    }
+
+    pub unsafe fn reset_attempt(&mut self) {
+        self.paddle.cur_state.rect = Rect::new(368f32, 558f32, 64f32, 32f32);
+        self.paddle.cur_state.velocity = Point::empty();
+        self.ball.cur_state.rect = Rect::new(388f32, 524f32, 24f32, 24f32);
+        self.ball.cur_state.velocity = Point::empty();
     }
 
     pub unsafe fn event(&mut self, ev: Event) {

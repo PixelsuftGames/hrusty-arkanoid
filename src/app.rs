@@ -77,6 +77,9 @@ pub unsafe fn run() {
                         scancode::SDL_SCANCODE_D | scancode::SDL_SCANCODE_RIGHT => {
                             a().scene.event(if ev.key.down { Event::RightDown } else { Event::RightUp });
                         },
+                        scancode::SDL_SCANCODE_R => {
+                            a().scene.init();
+                        },
                         scancode::SDL_SCANCODE_SPACE => {
                             if ev.key.down {
                                 a().scene.event(Event::Space);
