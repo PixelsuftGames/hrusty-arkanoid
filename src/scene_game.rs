@@ -248,8 +248,8 @@ impl SceneGame {
         let prev_hp = self.ball.cur_state.hp;
         while dt_left > 0f32 {
             let mut min_col_t = dt_left;
-            #[allow(invalid_value)]
-            let mut col_obj: *mut dyn Entity = core::mem::MaybeUninit::uninit().assume_init();
+            // Dummy value
+            let mut col_obj: *mut dyn Entity = &mut self.paddle as *mut dyn Entity;
             self.ball.do_move(dt_left);
             self.paddle.do_move(dt_left);
             if self.paddle.collides(&self.ball) {
@@ -315,7 +315,7 @@ impl SceneGame {
             return dt;
         }
         let mut right = dt;
-        while (right - left) > 0.00001f32 {
+        while (right - left) > 0.0000000005f32 {
             let center = (left + right) / 2f32;
             ball.do_move(center);
             obj.do_move(center);
@@ -367,6 +367,10 @@ impl SceneGame {
             },
             Event::LeftUp | Event::RightDown => {
                 self.paddle.holding += 1;
+            },
+            Event::C => {
+                // Cheat
+                self.ball.cur_state.hp = 20;
             }
         }
     }

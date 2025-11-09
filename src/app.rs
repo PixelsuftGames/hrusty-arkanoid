@@ -56,17 +56,6 @@ pub unsafe fn run() {
                     ren::update_scale();
                 },
                 events::SDL_EVENT_KEY_DOWN | events::SDL_EVENT_KEY_UP => {
-                    if ev.key.scancode == scancode::SDL_SCANCODE_ESCAPE && !ev.key.down {
-                        match &a().scene {
-                            SceneBase::Menu(_) => {
-                                a().running = false;
-                            },
-                            SceneBase::Game(_) => {
-                                run_scene(scene_base::SceneBase::new_menu());
-                            }
-                        }
-                        break;
-                    }
                     if ev.key.down && ev.key.repeat {
                         break;
                     }
@@ -77,12 +66,31 @@ pub unsafe fn run() {
                         scancode::SDL_SCANCODE_D | scancode::SDL_SCANCODE_RIGHT => {
                             a().scene.event(if ev.key.down { Event::RightDown } else { Event::RightUp });
                         },
-                        scancode::SDL_SCANCODE_R => {
-                            a().scene.init();
+                        scancode::SDL_SCANCODE_C => {
+                            if ev.key.down {
+                                a().scene.event(Event::C);
+                            }
                         },
-                        scancode::SDL_SCANCODE_SPACE => {
+                        scancode::SDL_SCANCODE_R => {
+                            if ev.key.down {
+                                a().scene.init();
+                            }
+                        },
+                        scancode::SDL_SCANCODE_SPACE | scancode::SDL_SCANCODE_RETURN | scancode::SDL_SCANCODE_RETURN2 => {
                             if ev.key.down {
                                 a().scene.event(Event::Space);
+                            }
+                        },
+                        scancode::SDL_SCANCODE_ESCAPE => {
+                            if ev.key.down {
+                                match &a().scene {
+                                    SceneBase::Menu(_) => {
+                                        a().running = false;
+                                    },
+                                    SceneBase::Game(_) => {
+                                        run_scene(scene_base::SceneBase::new_menu());
+                                    }
+                                }
                             }
                         },
                         _ => {}

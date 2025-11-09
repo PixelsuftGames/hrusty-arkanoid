@@ -5,7 +5,8 @@ pub enum Event {
     LeftUp,
     RightDown,
     RightUp,
-    Space
+    Space,
+    C
 }
 
 pub enum SceneBase {

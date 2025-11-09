@@ -24,7 +24,7 @@ impl Rect {
     }
 
     pub fn intersects(&self, r: &Rect) -> bool {
-        self.x + self.w >= r.x && self.x < r.x + r.w && self.y + self.h >= r.y && self.y < r.y + r.h
+        self.x + self.w > r.x && self.x < r.x + r.w && self.y + self.h > r.y && self.y < r.y + r.h
     }
 
     pub fn collision(&self, r: &Rect) -> Rect {

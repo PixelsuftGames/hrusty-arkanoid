@@ -63,7 +63,7 @@ pub unsafe fn load_surf(path: *const i8) -> surf::Surface {
         panic!("Failed to read file");
     }
     let mut ret: *mut surface::SDL_Surface = core::ptr::null_mut();
-    let h = upng::upng_new_from_bytes(data as *const u8, size as u32);
+    let h = upng::upng_new_from_bytes(data as *const u8, size as core::ffi::c_ulong);
     if h.is_null() {
         fatal!("Failed to create upng");
     }

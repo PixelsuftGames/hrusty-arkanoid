@@ -59,6 +59,9 @@ unsafe fn panic(info: &PanicInfo) -> ! {
     abort();
 }
 
+#[unsafe(no_mangle)]
+pub unsafe fn rust_eh_personality() {}
+
 pub unsafe fn last_error() -> *const c_char {
     sdl3_sys::error::SDL_GetError()
 }
