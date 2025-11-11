@@ -151,8 +151,7 @@ impl Entity for Paddle {
             }
         }
         // Accurately process acceleration (S is area below V(t))
-        self.new_state.rect.x += self.cur_state.velocity.x * dt / 2f32;
-        self.new_state.rect.x += self.new_state.velocity.x * dt / 2f32;
+        self.new_state.rect.x += (self.cur_state.velocity.x + self.new_state.velocity.x) * dt / 2f32;
         self.new_state.rect.x = self.new_state.rect.x.min(800f32 - self.cur_state.rect.w).max(0f32);
         // self.new_state.rect.y += self.cur_state.velocity.y * dt / 2f32;
     }
