@@ -23,7 +23,6 @@ pub unsafe fn init(h: &mut Loader) {
     l().tex[3] = load_tex(cs!("assets/ball.png"));
     l().tex[3].pixelate(true);
     l().tex[4] = load_tex(cs!("assets/heart.png"));
-    l().tex[4].pixelate(true);
     l().tex[5] = load_tex(cs!("assets/logo.png"));
     l().tex[6] = load_tex(cs!("assets/space.png"));
 }
