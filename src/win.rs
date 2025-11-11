@@ -14,7 +14,7 @@ impl Drop for WinContext {
 
 pub unsafe fn create() -> Option<WinContext> {
     handle = video::SDL_CreateWindow(
-        cs!("Arkanoid (Hrusty)"), 1024, 768,
+        cs!("Arkanoid"), 1024, 768,
         video::SDL_WINDOW_HIGH_PIXEL_DENSITY | video::SDL_WINDOW_RESIZABLE | video::SDL_WINDOW_HIDDEN
     );
     if handle.is_null() {
@@ -36,4 +36,8 @@ pub unsafe fn set_shown(show: bool) {
     if !ret {
         warn!("Failed to set window %s (%s)", last_error(), if show { cs!("shown") } else { cs!("hidden") });
     }
+}
+
+pub unsafe fn set_title(title: *const i8) {
+    video::SDL_SetWindowTitle(handle, title);
 }

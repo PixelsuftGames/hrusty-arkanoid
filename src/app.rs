@@ -1,5 +1,5 @@
-use crate::{audio, clock, hrust, ldr, ren, scene_base::{self, Event, SceneBase}, win};
-use sdl3_sys::{events, scancode};
+use crate::{audio, clock, cs, hrust, ldr, ren, scene_base::{self, Event, SceneBase}, win};
+use sdl3_sys::{events, scancode, stdinc, timer};
 
 pub struct App {
     clock: clock::Clock,
@@ -82,6 +82,11 @@ pub unsafe fn run() {
                                 a().scene.event(Event::Space);
                             }
                         },
+                        scancode::SDL_SCANCODE_V => {
+                            if ev.key.down {
+                                ren::toggle_vsync();
+                            }
+                        },
                         scancode::SDL_SCANCODE_ESCAPE => {
                             if ev.key.down {
                                 match &a().scene {
@@ -99,6 +104,23 @@ pub unsafe fn run() {
                 },
                 _ => {}
             }
+        }
+        let kb_state = sdl3_sys::keyboard::SDL_GetModState();
+        if kb_state & sdl3_sys::keycode::SDL_KMOD_CTRL > 0 {
+            timer::SDL_DelayNS(50000000);
+        }
+        if kb_state & sdl3_sys::keycode::SDL_KMOD_SHIFT > 0 {
+            let mut fps_buf = [0i8; 16];
+            fps_buf[0] = 'F' as i8;
+            fps_buf[1] = 'P' as i8;
+            fps_buf[2] = 'S' as i8;
+            fps_buf[3] = ':' as i8;
+            fps_buf[4] = ' ' as i8;
+            stdinc::SDL_itoa(a().clock.get_fps(), fps_buf.as_mut_ptr().wrapping_add(5), 10);
+            win::set_title(fps_buf.as_ptr());
+        }
+        else {
+            win::set_title(cs!("Arkanoid"));
         }
         update();
         draw();

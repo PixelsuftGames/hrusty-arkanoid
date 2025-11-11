@@ -113,3 +113,10 @@ pub unsafe fn clear(col: &Color) {
     apply_draw_color(col);
     render::SDL_RenderClear(handle);
 }
+
+pub unsafe fn toggle_vsync() {
+    let mut buf: i32 = 0;
+    if render::SDL_GetRenderVSync(handle, &mut buf as *mut i32) {
+        render::SDL_SetRenderVSync(handle, buf ^ 1);
+    }
+}
