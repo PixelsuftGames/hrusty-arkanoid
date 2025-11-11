@@ -7,7 +7,7 @@ What is different?
  - Many unsafe code
  - Use of C libs
 ## What about collisions?
-I tried to make precise collisions by approximating collision time using binary search for processing collisions like sub-frames
+I tried to make precise collisions by approximating collision time using binary search and processing collisions like sub-frames
 ## Dependencies
 Everything is already bundled
 - [upng](https://github.com/FREEWING-JP/upng/tree/feature/add_index_color_pallet) <br />
