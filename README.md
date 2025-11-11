@@ -1,5 +1,5 @@
 # hrusty-arkanoid
-Simple arkanoid came written in Hrust
+Simple arkanoid came written in Hrust with SDL3
 ## What is Hrust?
 Like Crust, it is Rust that is actually fun! <br />
 What is different?
@@ -10,6 +10,7 @@ What is different?
 I tried to make precise collisions by approximating collision time using binary search and processing collisions like sub-frames
 ## Dependencies
 Everything is already bundled
+- [SDL](https://github.com/libsdl-org/SDL) <br />
 - [upng](https://github.com/FREEWING-JP/upng/tree/feature/add_index_color_pallet) <br />
 - [miniaudio](https://github.com/mackron/miniaudio)
 ## TODO
