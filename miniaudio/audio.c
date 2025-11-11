@@ -11,7 +11,7 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
     ma_decoder* pDecoder = (ma_decoder*)pDevice->pUserData;
     if (pDecoder == NULL)
         return;
-    ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount, NULL);
+    ma_data_source_read_pcm_frames(pDecoder, pOutput, frameCount, NULL);
     (void)pInput;
 }
 
@@ -20,7 +20,6 @@ int load_music(const char* path) {
     ma_result result = ma_decoder_init_file(path, NULL, &decoder);
     if (result != MA_SUCCESS)
         return 0;
-    ma_data_source_set_looping(&decoder, MA_TRUE);
     return 1;
 }
 
@@ -29,6 +28,7 @@ void free_music(void) {
 }
 
 int play_music(void) {
+    ma_data_source_set_looping(&decoder, MA_TRUE);
     ma_result result = ma_device_start(&device);
     if (result != MA_SUCCESS)
         return 0;
