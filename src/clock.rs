@@ -2,12 +2,12 @@ use sdl3_sys::timer;
 
 #[derive(Clone, Copy, Debug)]
 pub enum ClockType {
-    TM,
-    PC
+    TM, // Default Timer
+    PC // Performance Counter
 }
 
 pub struct Clock {
-    pub dt: f32,
+    pub dt: f32, // Delta time
     freq: f64,
     last_tick: u64,
     double_dt: f64,

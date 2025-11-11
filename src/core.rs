@@ -1,5 +1,6 @@
 use sdl3_sys::{init, error};
 use crate::{deb, fatal};
+
 pub struct CoreContext {}
 
 impl Drop for CoreContext {

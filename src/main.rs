@@ -24,7 +24,7 @@ pub unsafe fn main_func() {
     let _win_ctx = win::create().unwrap();
     let _ren_ctx = ren::create().unwrap();
     app::init();
-    let au_ctx = audio::create();
+    let au_ctx = audio::create().unwrap();
     app::run();
     drop(au_ctx); // Close device before decoder is closed, nice hack!
     app::destroy();

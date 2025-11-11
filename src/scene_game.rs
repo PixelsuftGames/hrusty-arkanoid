@@ -1,12 +1,11 @@
 use crate::{app, col::Color, ldr, rect::{Point, Rect}, ren, scene_base::{self, Event}};
-
 const BRICK_COLS: i32 = 10;
 const BRICK_ROWS: i32 = 5;
 const TOTAL_BRICKS: i32 = BRICK_COLS * BRICK_ROWS + 4;
 const MARGIN: f32 = 16f32;
 const PADDING: f32 = (800f32 - MARGIN * 2f32 - 64f32 * BRICK_COLS as f32) / (BRICK_COLS as f32 - 1f32);
 const DEF_SPEED: f32 = 200f32;
-const MAX_DT: f32 = 1f32 / 200f32;
+const MAX_DT: f32 = 1f32 / 15f32;
 
 trait Entity {
     unsafe fn do_move(&mut self, dt: f32);
@@ -315,7 +314,7 @@ impl SceneGame {
             return dt;
         }
         let mut right = dt;
-        while (right - left) > 0.0000000005f32 {
+        while (right - left) > core::f32::EPSILON {
             let center = (left + right) / 2f32;
             ball.do_move(center);
             obj.do_move(center);
@@ -349,9 +348,9 @@ impl SceneGame {
 
     pub unsafe fn reset_attempt(&mut self) {
         self.paddle.cur_state.rect = Rect::new(368f32, 558f32, 64f32, 32f32);
-        self.paddle.cur_state.velocity = Point::empty();
+        self.paddle.cur_state.velocity = Point::default();
         self.ball.cur_state.rect = Rect::new(388f32, 524f32, 24f32, 24f32);
-        self.ball.cur_state.velocity = Point::empty();
+        self.ball.cur_state.velocity = Point::default();
     }
 
     pub unsafe fn event(&mut self, ev: Event) {

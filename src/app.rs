@@ -33,7 +33,6 @@ pub unsafe fn destroy() {
 
 pub unsafe fn update() {
     a().clock.update();
-    // info!("FPS: %i", a().clock.get_fps());
     a().scene.update(a().clock.dt);
 }
 
@@ -43,8 +42,10 @@ pub unsafe fn draw() {
 
 pub unsafe fn run() {
     a().running = true;
+    win::set_title(cs!("Arkanoid"));
     audio::music_play();
     win::set_shown(true);
+    sdl3_sys::mouse::SDL_HideCursor();
     a().clock.reset();
     while a().running {
         let mut ev: events::SDL_Event = events::SDL_Event::default();
@@ -62,17 +63,21 @@ pub unsafe fn run() {
                     }
                     match ev.key.scancode {
                         scancode::SDL_SCANCODE_A | scancode::SDL_SCANCODE_LEFT => {
+                            // Move
                             a().scene.event(if ev.key.down { Event::LeftDown } else { Event::LeftUp });
                         },
                         scancode::SDL_SCANCODE_D | scancode::SDL_SCANCODE_RIGHT => {
+                            // Move
                             a().scene.event(if ev.key.down { Event::RightDown } else { Event::RightUp });
                         },
                         scancode::SDL_SCANCODE_C => {
+                            // Cheat
                             if ev.key.down {
                                 a().scene.event(Event::C);
                             }
                         },
                         scancode::SDL_SCANCODE_R => {
+                            // Reset
                             if ev.key.down {
                                 a().scene.init();
                             }
@@ -83,11 +88,13 @@ pub unsafe fn run() {
                             }
                         },
                         scancode::SDL_SCANCODE_V => {
+                            // Toggle VSync
                             if ev.key.down {
                                 ren::toggle_vsync();
                             }
                         },
                         scancode::SDL_SCANCODE_ESCAPE => {
+                            // Go back
                             if ev.key.down {
                                 match &a().scene {
                                     SceneBase::Menu(_) => {
@@ -107,9 +114,11 @@ pub unsafe fn run() {
         }
         let kb_state = sdl3_sys::keyboard::SDL_GetModState();
         if kb_state & sdl3_sys::keycode::SDL_KMOD_CTRL > 0 {
+            // Emulate low fps
             timer::SDL_DelayNS(50000000);
         }
         if kb_state & sdl3_sys::keycode::SDL_KMOD_SHIFT > 0 {
+            // Set title FPS
             let mut fps_buf = [0i8; 16];
             fps_buf[0] = 'F' as i8;
             fps_buf[1] = 'P' as i8;

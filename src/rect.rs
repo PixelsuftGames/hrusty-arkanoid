@@ -19,11 +19,8 @@ impl Rect {
         Rect { x: x, y: y, w: w, h: h }
     }
 
-    pub fn empty() -> Rect {
-        Rect { x: 0_f32, y: 0_f32, w: 0_f32, h: 0_f32 }
-    }
-
     pub fn intersects(&self, r: &Rect) -> bool {
+        // Strict collision
         self.x + self.w > r.x && self.x < r.x + r.w && self.y + self.h > r.y && self.y < r.y + r.h
     }
 
@@ -36,7 +33,7 @@ impl Rect {
         if left <= right && top <= bottom {
             Rect::new(left, top, right - left, bottom - top)
         } else {
-            Rect::empty()
+            Rect::default()
         }
     }
 }
@@ -44,9 +41,5 @@ impl Rect {
 impl Point {
     pub fn new(x: f32, y: f32) -> Point {
         Point { x: x, y: y }
-    }
-
-    pub fn empty() -> Point {
-        Point { x: 0_f32, y: 0_f32 }
     }
 }

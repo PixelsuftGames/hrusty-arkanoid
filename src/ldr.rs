@@ -14,6 +14,7 @@ pub unsafe fn l() -> &'static mut Loader {
 
 pub unsafe fn init(h: &mut Loader) {
     handle = h as *mut Loader;
+    // Let's load everything at once
     audio::music_open(cs!("assets/main.mp3"));
     l().tex[0] = load_tex(cs!("assets/bg.png"));
     l().tex[1] = load_tex(cs!("assets/brick.png"));
@@ -58,6 +59,7 @@ unsafe fn upng_error_str(status: upng::upng_error) -> *const i8 {
 }
 
 pub unsafe fn load_surf(path: *const i8) -> surf::Surface {
+    // Load image to memory via upng
     let mut size = 0usize;
     let data = iostream::SDL_LoadFile(path, &mut size as *mut usize);
     if data.is_null() {
@@ -110,6 +112,7 @@ pub unsafe fn load_surf(path: *const i8) -> surf::Surface {
 }
 
 pub unsafe fn load_tex(path: *const i8) -> Tex {
+    // Load texture from file
     let surf = load_surf(path);
     let mut ret = Tex::from_surf(&surf);
     drop(surf);

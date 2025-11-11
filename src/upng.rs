@@ -44,33 +44,6 @@ pub const UPNG_HEADER: upng_state = 1;
 pub const UPNG_DECODED: upng_state = 0;
 pub const UPNG_ERROR: upng_state = -1;
 
-/*
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct upng_source {
-    pub buffer: *const ffi::c_uchar,
-    pub size: ffi::c_ulong,
-    pub owning: ffi::c_char,
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct upng_t {
-    pub width: ffi::c_uint,
-    pub height: ffi::c_uint,
-    pub color_type: upng_color,
-    pub color_depth: ffi::c_uint,
-    pub format: upng_format,
-    pub buffer: *mut ffi::c_uchar,
-    pub size: ffi::c_ulong,
-    pub palette: *mut ffi::c_uchar,
-    pub error: upng_error,
-    pub error_line: ffi::c_uint,
-    pub state: upng_state,
-    pub source: upng_source,
-}
-*/
-
 pub type upng_t = ffi::c_void;
 
 unsafe extern "C" {

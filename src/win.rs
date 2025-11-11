@@ -14,7 +14,7 @@ impl Drop for WinContext {
 
 pub unsafe fn create() -> Option<WinContext> {
     handle = video::SDL_CreateWindow(
-        cs!("Arkanoid"), 1024, 768,
+        cs!("Hrusty Window"), 1024, 768,
         video::SDL_WINDOW_HIGH_PIXEL_DENSITY | video::SDL_WINDOW_RESIZABLE | video::SDL_WINDOW_HIDDEN
     );
     if handle.is_null() {
@@ -34,7 +34,7 @@ pub unsafe fn create() -> Option<WinContext> {
 pub unsafe fn set_shown(show: bool) {
     let ret = if show { video::SDL_ShowWindow(handle) } else { video::SDL_HideWindow(handle) };
     if !ret {
-        warn!("Failed to set window %s (%s)", last_error(), if show { cs!("shown") } else { cs!("hidden") });
+        warn!("Failed to set window %s (%s)", if show { cs!("shown") } else { cs!("hidden") }, last_error());
     }
 }
 

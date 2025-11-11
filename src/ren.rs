@@ -59,11 +59,15 @@ impl Tex {
     }
 
     pub unsafe fn destroy(&mut self) {
+        #[cfg(debug_assertions)]
         if self.handle.is_null() {
             panic!("Double free");
         }
         render::SDL_DestroyTexture(self.handle);
-        self.handle = core::ptr::null_mut();
+        #[cfg(debug_assertions)]
+        {
+            self.handle = core::ptr::null_mut();
+        }
     }
 }
 

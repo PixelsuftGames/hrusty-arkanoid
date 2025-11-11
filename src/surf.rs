@@ -13,6 +13,7 @@ impl Surface {
 
 impl Drop for Surface {
     fn drop(&mut self) {
+        // Surfaces are only used locally, so let's make destructor here
         unsafe {
             surface::SDL_DestroySurface(self.handle);
         }
