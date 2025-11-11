@@ -1,0 +1,28 @@
+#![allow(non_camel_case_types)]
+use core::ffi;
+
+use crate::fatal;
+
+unsafe extern "C" {
+    pub unsafe fn load_music(path: *const ffi::c_char) -> i32;
+    pub unsafe fn free_music();
+    pub unsafe fn play_music() -> i32;
+    unsafe fn audio_init() -> i32;
+    unsafe fn audio_destroy();
+}
+
+pub struct AudioContext {}
+
+impl Drop for AudioContext {
+    fn drop(&mut self) {
+        unsafe { audio_destroy(); }
+    }
+}
+
+pub unsafe fn create() -> Option<AudioContext> {
+    if audio_init() == 0 {
+        fatal!("Failed to init audio device");
+        return None;
+    }
+    Some(AudioContext {})
+}

@@ -358,7 +358,7 @@ impl SceneGame {
         match ev {
             Event::Space => {
                 if self.ball.cur_state.velocity.x == 0f32 && self.ball.cur_state.velocity.y == 0f32 {
-                    self.ball.cur_state.velocity.x = DEF_SPEED;
+                    self.ball.cur_state.velocity.x = if sdl3_sys::stdinc::SDL_rand(2) == 1 { DEF_SPEED } else { -DEF_SPEED };
                     self.ball.cur_state.velocity.y = DEF_SPEED;
                 }
             },

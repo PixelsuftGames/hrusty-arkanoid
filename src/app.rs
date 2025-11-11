@@ -1,4 +1,4 @@
-use crate::{clock, hrust, ldr, ren, scene_base::{self, Event, SceneBase}, win};
+use crate::{audio, clock, hrust, ldr, ren, scene_base::{self, Event, SceneBase}, win};
 use sdl3_sys::{events, scancode};
 
 pub struct App {
@@ -43,6 +43,7 @@ pub unsafe fn draw() {
 
 pub unsafe fn run() {
     a().running = true;
+    audio::play_music();
     win::set_shown(true);
     a().clock.reset();
     while a().running {

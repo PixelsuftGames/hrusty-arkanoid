@@ -63,8 +63,8 @@ freely, subject to the following restrictions:
 #define upng_chunk_type(chunk) MAKE_DWORD_PTR((chunk) + 4)
 #define upng_chunk_critical(chunk) (((chunk)[4] & 32) == 0)
 
-extern void* SDL_malloc(size_t size);
-extern void SDL_free(void* ptr);
+extern void* SDLCALL SDL_malloc(size_t size);
+extern void SDLCALL SDL_free(void* ptr);
 
 typedef enum upng_state {
 	UPNG_ERROR		= -1,

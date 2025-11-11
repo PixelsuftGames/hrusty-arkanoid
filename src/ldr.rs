@@ -1,5 +1,5 @@
 use sdl3_sys::{iostream, pixels, stdinc, surface};
-use crate::{cs, fatal, hrust::{self, last_error}, surf, ren::Tex, upng};
+use crate::{audio, cs, fatal, hrust::{self, last_error}, ren::Tex, surf, upng};
 
 #[derive(Debug, Default)]
 pub struct Loader {
@@ -14,6 +14,9 @@ pub unsafe fn l() -> &'static mut Loader {
 
 pub unsafe fn init(h: &mut Loader) {
     handle = h as *mut Loader;
+    if audio::load_music(cs!("assets/main.mp3")) == 0 {
+        panic!("Failed to load music");
+    }
     l().tex[0] = load_tex(cs!("assets/bg.png"));
     l().tex[1] = load_tex(cs!("assets/brick.png"));
     l().tex[2] = load_tex(cs!("assets/paddle.png"));
@@ -34,6 +37,7 @@ pub unsafe fn destroy() {
     l().tex[2].destroy();
     l().tex[1].destroy();
     l().tex[0].destroy();
+    audio::free_music();
 }
 
 pub unsafe fn get_tex(id: i32) -> &'static mut Tex {

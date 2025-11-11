@@ -13,6 +13,7 @@ mod rect;
 mod clock;
 mod surf;
 mod upng;
+mod audio;
 mod ldr;
 mod scene_base;
 mod scene_menu;
@@ -23,7 +24,9 @@ pub unsafe fn main_func() {
     let _win_ctx = win::create().unwrap();
     let _ren_ctx = ren::create().unwrap();
     app::init();
+    let au_ctx = audio::create();
     app::run();
+    drop(au_ctx); // Close device before decoder is closed, nice hack!
     app::destroy();
 }
 
