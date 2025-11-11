@@ -1,3 +1,3 @@
-upng/upng.h linguist-vendored=false
-upng/upng.c linguist-vendored=false
-miniaudio/miniaudio.h linguist-vendored=false
+upng/upng.h linguist-vendored
+upng/upng.c linguist-vendored
+miniaudio/miniaudio.h linguist-vendored
