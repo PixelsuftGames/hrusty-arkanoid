@@ -1,7 +1,6 @@
 #define MA_NO_WAV
 #define MA_NO_FLAC
 #define MINIAUDIO_IMPLEMENTATION
-#include <stdio.h>
 #include "miniaudio.h"
 
 static ma_decoder decoder;
@@ -17,6 +16,7 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
 }
 
 int load_music(const char* path) {
+    // TODO: actually load from memory
     ma_result result = ma_decoder_init_file(path, NULL, &decoder);
     if (result != MA_SUCCESS)
         return 0;

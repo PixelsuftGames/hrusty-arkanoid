@@ -43,7 +43,7 @@ pub unsafe fn draw() {
 
 pub unsafe fn run() {
     a().running = true;
-    audio::play_music();
+    audio::music_play();
     win::set_shown(true);
     a().clock.reset();
     while a().running {

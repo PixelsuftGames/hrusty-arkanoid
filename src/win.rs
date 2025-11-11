@@ -14,7 +14,7 @@ impl Drop for WinContext {
 
 pub unsafe fn create() -> Option<WinContext> {
     handle = video::SDL_CreateWindow(
-        cs!("Arkanoid"), 1024, 768,
+        cs!("Arkanoid (Hrusty)"), 1024, 768,
         video::SDL_WINDOW_HIGH_PIXEL_DENSITY | video::SDL_WINDOW_RESIZABLE | video::SDL_WINDOW_HIDDEN
     );
     if handle.is_null() {

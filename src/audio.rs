@@ -1,12 +1,11 @@
 #![allow(non_camel_case_types)]
 use core::ffi;
-
 use crate::fatal;
 
 unsafe extern "C" {
-    pub unsafe fn load_music(path: *const ffi::c_char) -> i32;
-    pub unsafe fn free_music();
-    pub unsafe fn play_music() -> i32;
+    unsafe fn load_music(path: *const ffi::c_char) -> i32;
+    unsafe fn free_music();
+    unsafe fn play_music() -> i32;
     unsafe fn audio_init() -> i32;
     unsafe fn audio_destroy();
 }
@@ -25,4 +24,18 @@ pub unsafe fn create() -> Option<AudioContext> {
         return None;
     }
     Some(AudioContext {})
+}
+
+pub unsafe fn music_open(path: *const ffi::c_char) {
+    if load_music(path) == 0 {
+        panic!("Failed to load music");
+    }
+}
+
+pub unsafe fn music_close() {
+    free_music();
+}
+
+pub unsafe fn music_play() {
+    play_music();
 }

@@ -12,10 +12,19 @@ unsafe extern "C" {
     pub unsafe fn abort() -> !;
 }
 
+#[cfg(debug_assertions)]
 #[macro_export]
 macro_rules! deb {
     ($fmt:literal $($args:tt)*) => {{
         unsafe { sdl3_sys::log::SDL_LogInfo(0, crate::cs!($fmt) $($args)*) }
+    }};
+}
+
+#[cfg(not(debug_assertions))]
+#[macro_export]
+macro_rules! deb {
+    ($fmt:literal $($args:tt)*) => {{
+        
     }};
 }
 

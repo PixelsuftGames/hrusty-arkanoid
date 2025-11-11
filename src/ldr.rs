@@ -14,9 +14,7 @@ pub unsafe fn l() -> &'static mut Loader {
 
 pub unsafe fn init(h: &mut Loader) {
     handle = h as *mut Loader;
-    if audio::load_music(cs!("assets/main.mp3")) == 0 {
-        panic!("Failed to load music");
-    }
+    audio::music_open(cs!("assets/main.mp3"));
     l().tex[0] = load_tex(cs!("assets/bg.png"));
     l().tex[1] = load_tex(cs!("assets/brick.png"));
     l().tex[2] = load_tex(cs!("assets/paddle.png"));
@@ -37,7 +35,7 @@ pub unsafe fn destroy() {
     l().tex[2].destroy();
     l().tex[1].destroy();
     l().tex[0].destroy();
-    audio::free_music();
+    audio::music_close();
 }
 
 pub unsafe fn get_tex(id: i32) -> &'static mut Tex {
