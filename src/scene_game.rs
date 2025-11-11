@@ -5,13 +5,19 @@ const TOTAL_BRICKS: i32 = BRICK_COLS * BRICK_ROWS + 4;
 const MARGIN: f32 = 16f32;
 const PADDING: f32 = (800f32 - MARGIN * 2f32 - 64f32 * BRICK_COLS as f32) / (BRICK_COLS as f32 - 1f32);
 const DEF_SPEED: f32 = 200f32;
-const MAX_DT: f32 = 1f32 / 15f32;
+// For sure set minimum physics FPS to 60
+const MAX_DT: f32 = 1f32 / 60f32;
 
 trait Entity {
+    // Try to make new_state from cur_state (by using dt)
     unsafe fn do_move(&mut self, dt: f32);
+    // Draw
     unsafe fn draw(&mut self);
+    // Sync new_state to cur_state
     unsafe fn sync(&mut self);
+    // Does new_state collides with ball?
     unsafe fn collides(&mut self, ball: &Ball) -> bool;
+    // Process collision
     unsafe fn hit(&mut self, ball: &mut Ball);
 }
 
@@ -29,15 +35,17 @@ pub struct Brick {
 
 impl Brick {
     pub unsafe fn is_dead(&self) -> bool {
-        self.cur_state.hp == 0
+        // Fully broken <=> 0hp, Invisible Wall <=> 999hp
+        self.cur_state.hp == 0 || self.cur_state.hp == 999
     }
 }
 
 impl Entity for Brick {
     unsafe fn draw(&mut self) {
-        if self.is_dead() || self.cur_state.hp == 999 {
+        if self.is_dead() {
             return;
         }
+        // Color based on HP
         ldr::get_tex(1).color(&match self.cur_state.hp {
             1 => Color::new_rgb255(255f32, 255f32, 255f32),
             2 => Color::new_rgb255(34f32, 177f32, 76f32),
@@ -120,6 +128,7 @@ impl Entity for Paddle {
         self.new_state = self.cur_state;
         // self.new_state.rect.y += self.cur_state.velocity.y * dt / 2f32;
         if self.holding == 0 {
+            // Deaccelerate
             if self.new_state.velocity.x >= 0f32 {
                 self.new_state.velocity.x -= 50f32 * dt;
             }
@@ -128,8 +137,9 @@ impl Entity for Paddle {
             }
         }
         else if self.new_state.velocity.x.abs() < 350f32 {
+            // Try to increase speed
             self.new_state.velocity.x += dt * self.holding as f32 * 500f32;
-            // accurately clamp values
+            // Accurately clamp values if we were limited to max_speed
             if self.new_state.velocity.x.abs() > 350f32 {
                 let extra_time = (self.new_state.velocity.x.abs() - 350f32) / dt / 500f32;
                 self.new_state.velocity.x = 350f32 * self.new_state.velocity.x.signum();
@@ -140,6 +150,7 @@ impl Entity for Paddle {
                 return;
             }
         }
+        // Accurately process acceleration (S is area below V(t))
         self.new_state.rect.x += self.cur_state.velocity.x * dt / 2f32;
         self.new_state.rect.x += self.new_state.velocity.x * dt / 2f32;
         self.new_state.rect.x = self.new_state.rect.x.min(800f32 - self.cur_state.rect.w).max(0f32);
@@ -155,6 +166,8 @@ impl Entity for Paddle {
     }
 
     unsafe fn hit(&mut self, ball: &mut Ball) {
+        // Assuming that inter is relatively small, so we can doesn't account speed to check from which side
+        // collision was made
         let inter = ball.cur_state.rect.collision(&self.cur_state.rect);
         if inter.w == inter.h {
             ball.cur_state.velocity.x *= -1f32;
@@ -238,20 +251,27 @@ impl SceneGame {
 
     pub unsafe fn update(&mut self, orig_dt: f32) {
         let mut dt = orig_dt;
+        // Limit physics minimum FPS
         while dt > MAX_DT {
             self.update(MAX_DT);
             dt -= MAX_DT;
         }
+        // Are we won?
         let mut done = true;
+        // How much dt we need to try to process (can be less at 1 update cuz of collision)
         let mut dt_left = dt;
+        // Hacky way to check if ball died once
         let prev_hp = self.ball.cur_state.hp;
         while dt_left > 0f32 {
+            // Earliest possible collision time (min_col_t = dt_left means no collision)
             let mut min_col_t = dt_left;
             // Dummy value
             let mut col_obj: *mut dyn Entity = &mut self.paddle as *mut dyn Entity;
+            // Try to move objects
             self.ball.do_move(dt_left);
             self.paddle.do_move(dt_left);
             if self.paddle.collides(&self.ball) {
+                // Collision with paddle, ofc it's the earliest time
                 min_col_t = SceneGame::find_collision_time(&mut self.ball, &mut self.paddle, dt_left);
                 col_obj = &mut self.paddle;
             }
@@ -259,6 +279,7 @@ impl SceneGame {
                 done &= brick.is_dead();
                 brick.do_move(dt_left);
                 if brick.collides(&self.ball) {
+                    // Collision, maybe that one was earlier?
                     let col_t = SceneGame::find_collision_time(&mut self.ball, brick, dt_left);
                     if col_t < min_col_t {
                         min_col_t = col_t;
@@ -267,7 +288,9 @@ impl SceneGame {
                 }
             }
             if min_col_t < dt_left && !done {
+                // Mom, we have collision at home!
                 let col_obj = &mut *col_obj;
+                // Sync all objects to collision time (we are sure there are no collision before min_col_t)
                 self.ball.do_move(min_col_t);
                 self.ball.sync();
                 self.paddle.do_move(min_col_t);
@@ -276,7 +299,9 @@ impl SceneGame {
                     brick.do_move(min_col_t);
                     brick.sync();
                 }
+                // Process collision
                 col_obj.hit(&mut self.ball);
+                // Process remaining dt_left again
                 dt_left -= min_col_t;
             }
             else {
@@ -284,15 +309,18 @@ impl SceneGame {
             }
         }
         if done {
+            // We won
             app::run_scene(crate::scene_base::SceneBase::new_menu());
             return;
         }
+        // Let's sync everything for sure
         self.ball.sync();
         self.paddle.sync();
         for brick in self.bricks.iter_mut() {
             brick.sync();
         }
         if prev_hp != self.ball.cur_state.hp {
+            // Ball died
             if self.ball.cur_state.hp == 0 {
                 app::run_scene(scene_base::SceneBase::new_menu());
             }
@@ -303,12 +331,16 @@ impl SceneGame {
     }
 
     unsafe fn find_collision_time(ball: &mut Ball, obj: &mut dyn Entity, dt: f32) -> f32 {
+        /*
+        time = 0 <=> No Collision
+        time = dt <=> Collision
+        OFC let's use binary search to approximate collision time very nice
+        */
         let mut left = 0f32;
         ball.do_move(0f32);
         obj.do_move(0f32);
-        // Softlock check
+        // Softlock check for sure (<=> already had collision before updating (2 objects collide at exact same time???))
         if obj.collides(&ball) {
-            // panic!("Softlock");
             ball.do_move(dt);
             obj.do_move(dt);
             return dt;
@@ -328,12 +360,12 @@ impl SceneGame {
         // Go back
         ball.do_move(dt);
         obj.do_move(dt);
-        // For sure
+        // Return earliest possible collision time so we will be able to find collision side for inverting ball
         right
     }
 
     pub unsafe fn draw(&mut self) {
-        ren::clear(&Color::new_rgb(0f32, 0f32, 50f32 / 255f32));
+        ren::clear(&Color::default());
         ldr::get_tex(0).draw(&Point::new(0f32, -100f32));
         for brick in self.bricks.iter_mut() {
             brick.draw()
@@ -368,7 +400,7 @@ impl SceneGame {
                 self.paddle.holding += 1;
             },
             Event::C => {
-                // Cheat
+                // Cheat (cuz me noob)
                 self.ball.cur_state.hp = 20;
             }
         }
@@ -377,6 +409,7 @@ impl SceneGame {
 
 impl Default for SceneGame {
     fn default() -> SceneGame {
+        // IDK but why no Default trait for arrays?
         SceneGame {
             bricks: [Default::default(); TOTAL_BRICKS as usize],
             paddle: Default::default(),

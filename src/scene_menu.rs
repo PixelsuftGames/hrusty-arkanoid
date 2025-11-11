@@ -18,7 +18,7 @@ impl SceneMenu {
     }
 
     pub unsafe fn draw(&mut self) {
-        ren::clear(&Color::new_rgb(0f32, 0f32, 0f32));
+        ren::clear(&Color::default());
         ldr::get_tex(0).draw(&Point::new(0f32, -100f32));
         ldr::get_tex(5).draw(&Point::new(400f32 - 399f32 / 2f32, 150f32 - 93f32));
         ldr::get_tex(6).alpha((sdl3_sys::stdinc::SDL_sinf(self.space_timer) + 1f32) / 2f32);
