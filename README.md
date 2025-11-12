@@ -1,5 +1,5 @@
 # hrusty-arkanoid
-Simple arkanoid came written in Hrust with SDL3
+Simple arkanoid game written in Hrust with SDL3
 ## What is Hrust?
 Like Crust, it is Rust that is actually fun! <br />
 What is different?
