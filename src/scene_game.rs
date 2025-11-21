@@ -13,8 +13,8 @@ const MARGIN: f32 = 16f32;
 const PADDING: f32 =
     (800f32 - MARGIN * 2f32 - 64f32 * BRICK_COLS as f32) / (BRICK_COLS as f32 - 1f32);
 const DEF_SPEED: f32 = 200f32;
-// For sure set minimum physics FPS to 30
-const MAX_DT: f32 = 1f32 / 30f32;
+// For sure set minimum physics FPS to 20
+const MAX_DT: f32 = 1f32 / 20f32;
 
 trait Entity {
     // Try to make new_state from cur_state (by using dt)
@@ -422,12 +422,16 @@ impl SceneGame {
                 left = center;
             }
         }
+        ball.do_move(right);
+        obj.do_move(right);
         let has_collision = obj.collides(ball);
         ball.do_move(dt);
         obj.do_move(dt);
         if has_collision {
             // info!("Found collision between %f: %f", dt as f64, right as f64);
-            return right;
+            // return right;
+            // lul why not
+            return SceneGame::find_collision_time(ball, obj, right);
         }
         dt
     }
