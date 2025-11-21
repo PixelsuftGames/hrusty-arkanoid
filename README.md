@@ -7,7 +7,7 @@ What is different?
  - Many unsafe code
  - Use of C libs
 ## What about collisions?
-I tried to make precise collisions by approximating collision time using binary search and processing collisions like sub-frames. But what about situations when a small object "teleported" through another between frames? <br />
+I tried to make precise collisions by approximating collision time using binary search (not colliding state -> colliding state) and processing collisions like sub-frames. But what about situations when a small object "teleported" through another between frames? <br />
 Updated: Added a new experimental deep collision detection.
 We can calculate distance between two objects (rects). So we can find distance delta in a very small time (f32 epsilon). If distance was decreasing and then became increasing (again binary search), there is chance that there was a collision at the smallest distance.
 ## Dependencies
