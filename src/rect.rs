@@ -24,6 +24,7 @@ impl Rect {
         }
     }
 
+    #[inline]
     pub fn intersects(&self, r: &Rect) -> bool {
         // Strict collision
         self.x + self.w > r.x && self.x < r.x + r.w && self.y + self.h > r.y && self.y < r.y + r.h
@@ -76,6 +77,7 @@ impl Point {
         Point { x: x, y: y }
     }
 
+    #[inline]
     pub fn distance(&self, &p: &Point) -> f32 {
         unsafe {
             sdl3_sys::stdinc::SDL_sqrtf(

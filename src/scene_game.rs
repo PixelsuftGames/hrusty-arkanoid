@@ -25,7 +25,7 @@ trait Entity {
     unsafe fn sync(&mut self);
     // Does new_state collides with ball?
     unsafe fn collides(&mut self, ball: &Ball) -> bool;
-    // Get distance between objects (deep collision check)?
+    // Get distance between objects (deep collision check)
     unsafe fn dist(&mut self, ball: &Ball) -> f32;
     // Process collision
     unsafe fn hit(&mut self, ball: &mut Ball);
@@ -138,10 +138,12 @@ impl Entity for Paddle {
         // self.new_state.rect.y += self.cur_state.velocity.y * dt / 2f32;
         if self.holding == 0 {
             // Deaccelerate
-            if self.new_state.velocity.x >= 0f32 {
-                self.new_state.velocity.x -= 50f32 * dt;
-            } else {
-                self.new_state.velocity.x += 50f32 * dt;
+            if self.new_state.velocity.x != 0f32 {
+                if self.new_state.velocity.x >= 0f32 {
+                    self.new_state.velocity.x -= 50f32 * dt;
+                } else {
+                    self.new_state.velocity.x += 50f32 * dt;
+                }
             }
         } else if self.new_state.velocity.x.abs() < 350f32 {
             // Try to increase speed
@@ -463,6 +465,7 @@ impl SceneGame {
     pub unsafe fn reset_attempt(&mut self) {
         self.paddle.cur_state.rect = Rect::new(368f32, 558f32, 64f32, 32f32);
         self.paddle.cur_state.velocity = Point::default();
+        self.paddle.new_state.velocity = Point::default();
         self.ball.cur_state.rect = Rect::new(388f32, 524f32, 24f32, 24f32);
         self.ball.cur_state.velocity = Point::default();
     }

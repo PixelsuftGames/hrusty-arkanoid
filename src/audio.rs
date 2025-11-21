@@ -27,16 +27,19 @@ pub unsafe fn create() -> Option<AudioContext> {
     Some(AudioContext {})
 }
 
+#[inline]
 pub unsafe fn music_open(path: *const i8) {
     if load_music(path) == 0 {
         panic!("Failed to load music");
     }
 }
 
+#[inline]
 pub unsafe fn music_close() {
     free_music();
 }
 
+#[inline]
 pub unsafe fn music_play() {
     play_music();
 }

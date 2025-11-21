@@ -13,6 +13,7 @@ pub struct Loader {
 
 static mut handle: *mut Loader = core::ptr::null_mut();
 
+#[inline]
 pub unsafe fn l() -> &'static mut Loader {
     &mut *handle
 }
@@ -43,6 +44,7 @@ pub unsafe fn destroy() {
     audio::music_close();
 }
 
+#[inline]
 pub unsafe fn get_tex(id: i32) -> &'static mut Tex {
     &mut l().tex[id as usize]
 }

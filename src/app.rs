@@ -14,6 +14,7 @@ pub struct App {
 
 static mut handle: *mut App = core::ptr::null_mut();
 
+#[inline]
 pub unsafe fn a() -> &'static mut App {
     &mut *handle
 }
