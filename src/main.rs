@@ -4,20 +4,20 @@
 #![allow(dead_code)]
 #![allow(non_upper_case_globals)]
 mod app;
-mod hrust;
-mod core;
-mod win;
-mod ren;
-mod col;
-mod rect;
+mod audio;
 mod clock;
+mod col;
+mod core;
+mod hrust;
+mod ldr;
+mod rect;
+mod ren;
+mod scene_base;
+mod scene_game;
+mod scene_menu;
 mod surf;
 mod upng;
-mod audio;
-mod ldr;
-mod scene_base;
-mod scene_menu;
-mod scene_game;
+mod win;
 
 pub unsafe fn main_func() {
     let _core_ctx = core::create().unwrap();
@@ -29,7 +29,6 @@ pub unsafe fn main_func() {
     drop(au_ctx); // Close device before decoder is closed, nice hack!
     app::destroy();
 }
-
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn main(_argc: i32, _argv: *mut *mut u8) -> i32 {

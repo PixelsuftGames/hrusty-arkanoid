@@ -1,9 +1,14 @@
+use crate::{
+    audio, cs, fatal,
+    hrust::{self, last_error},
+    ren::Tex,
+    surf, upng,
+};
 use sdl3_sys::{iostream, pixels, stdinc, surface};
-use crate::{audio, cs, fatal, hrust::{self, last_error}, ren::Tex, surf, upng};
 
 #[derive(Debug, Default)]
 pub struct Loader {
-    tex: [Tex;8]
+    tex: [Tex; 8],
 }
 
 static mut handle: *mut Loader = core::ptr::null_mut();
@@ -53,7 +58,7 @@ unsafe fn upng_error_str(status: upng::upng_error) -> *const i8 {
         upng::UPNG_ENOTFOUND => cs!("UPNG_ENOTFOUND"),
         upng::UPNG_ENOMEM => cs!("UPNG_ENOMEM"),
         upng::UPNG_EOK => cs!("UPNG_EOK"),
-        _ => unreachable!()
+        _ => unreachable!(),
     }
 }
 
@@ -69,8 +74,7 @@ pub unsafe fn load_surf(path: *const i8) -> surf::Surface {
     let h = upng::upng_new_from_bytes(data as *const u8, size as core::ffi::c_ulong);
     if h.is_null() {
         fatal!("Failed to create upng");
-    }
-    else {
+    } else {
         let err = upng::upng_decode(h);
         if err == upng::UPNG_EOK {
             ret = surface::SDL_CreateSurface(
@@ -79,26 +83,24 @@ pub unsafe fn load_surf(path: *const i8) -> surf::Surface {
                 match upng::upng_get_components(h) {
                     // 3 => pixels::SDL_PIXELFORMAT_RGBA8888,
                     4 => pixels::SDL_PIXELFORMAT_RGBA32,
-                    _ => unimplemented!()
-                }
+                    _ => unimplemented!(),
+                },
             );
             if ret.is_null() {
                 fatal!("Failed to create SDL surface (%s)", last_error());
-            }
-            else {
+            } else {
                 match upng::upng_get_components(h) {
                     4 => {
                         stdinc::SDL_memcpy(
                             (*ret).pixels,
                             upng::upng_get_buffer(h) as *const hrust::c_void,
-                            upng::upng_get_size(h) as usize
+                            upng::upng_get_size(h) as usize,
                         );
-                    },
-                    _ => unimplemented!()
+                    }
+                    _ => unimplemented!(),
                 }
             }
-        }
-        else {
+        } else {
             fatal!("Failed to decode png image (%s)", upng_error_str(err));
         }
         upng::upng_free(h);

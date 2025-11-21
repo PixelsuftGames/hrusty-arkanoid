@@ -1,12 +1,20 @@
-use crate::{app, col::Color, ldr, rect::{Point, Rect}, ren, scene_base::{self, Event}};
+use crate::{
+    app,
+    col::Color,
+    ldr,
+    rect::{Point, Rect},
+    ren,
+    scene_base::{self, Event},
+};
 const BRICK_COLS: i32 = 10;
 const BRICK_ROWS: i32 = 5;
 const TOTAL_BRICKS: i32 = BRICK_COLS * BRICK_ROWS + 4;
 const MARGIN: f32 = 16f32;
-const PADDING: f32 = (800f32 - MARGIN * 2f32 - 64f32 * BRICK_COLS as f32) / (BRICK_COLS as f32 - 1f32);
+const PADDING: f32 =
+    (800f32 - MARGIN * 2f32 - 64f32 * BRICK_COLS as f32) / (BRICK_COLS as f32 - 1f32);
 const DEF_SPEED: f32 = 200f32;
-// For sure set minimum physics FPS to 60
-const MAX_DT: f32 = 1f32 / 60f32;
+// For sure set minimum physics FPS to 30
+const MAX_DT: f32 = 1f32 / 30f32;
 
 trait Entity {
     // Try to make new_state from cur_state (by using dt)
@@ -17,20 +25,22 @@ trait Entity {
     unsafe fn sync(&mut self);
     // Does new_state collides with ball?
     unsafe fn collides(&mut self, ball: &Ball) -> bool;
+    // Get distance between objects (deep collision check)?
+    unsafe fn dist(&mut self, ball: &Ball) -> f32;
     // Process collision
     unsafe fn hit(&mut self, ball: &mut Ball);
 }
 
 #[derive(Debug, Default, Clone, Copy)]
 struct BrickState {
-    hp: i32
+    hp: i32,
 }
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Brick {
     cur_state: BrickState,
     new_state: BrickState,
-    rect: Rect
+    rect: Rect,
 }
 
 impl Brick {
@@ -52,7 +62,7 @@ impl Entity for Brick {
             3 => Color::new_rgb255(255f32, 127f32, 39f32),
             4 => Color::new_rgb255(237f32, 28f32, 36f32),
             5 => Color::new_rgb255(0f32, 174f32, 250f32),
-            _ => unreachable!()
+            _ => unreachable!(),
         });
         ldr::get_tex(1).draw(&Point::new(self.rect.x, self.rect.y));
     }
@@ -86,37 +96,36 @@ impl Entity for Brick {
                 ball.cur_state.rect.x = 1000f32;
                 ball.cur_state.rect.y = 1000f32;
             }
-        }
-        else if self.rect.w == 100f32 {
+        } else if self.rect.w == 100f32 {
             ball.cur_state.velocity.x *= -1f32;
-        }
-        else if self.rect.h == 100f32 {
+        } else if self.rect.h == 100f32 {
             ball.cur_state.velocity.y *= -1f32;
-        }
-        else if inter.w == inter.h {
+        } else if inter.w == inter.h {
             ball.cur_state.velocity.x *= -1f32;
             ball.cur_state.velocity.y *= -1f32;
-        }
-        else if inter.w > inter.h {
+        } else if inter.w > inter.h {
             ball.cur_state.velocity.y *= -1f32;
-        }
-        else {
+        } else {
             ball.cur_state.velocity.x *= -1f32;
         }
+    }
+
+    unsafe fn dist(&mut self, ball: &Ball) -> f32 {
+        ball.new_state.rect.distance(&self.rect)
     }
 }
 
 #[derive(Debug, Default, Clone, Copy)]
 struct PaddleState {
     rect: Rect,
-    velocity: Point
+    velocity: Point,
 }
 
 #[derive(Debug, Default, Clone, Copy)]
 struct Paddle {
     cur_state: PaddleState,
     new_state: PaddleState,
-    holding: i32
+    holding: i32,
 }
 
 impl Entity for Paddle {
@@ -131,12 +140,10 @@ impl Entity for Paddle {
             // Deaccelerate
             if self.new_state.velocity.x >= 0f32 {
                 self.new_state.velocity.x -= 50f32 * dt;
-            }
-            else {
+            } else {
                 self.new_state.velocity.x += 50f32 * dt;
             }
-        }
-        else if self.new_state.velocity.x.abs() < 350f32 {
+        } else if self.new_state.velocity.x.abs() < 350f32 {
             // Try to increase speed
             self.new_state.velocity.x += dt * self.holding as f32 * 500f32;
             // Accurately clamp values if we were limited to max_speed
@@ -146,13 +153,24 @@ impl Entity for Paddle {
                 self.new_state.rect.x += self.cur_state.velocity.x * (dt - extra_time) / 2f32;
                 self.new_state.rect.x += self.new_state.velocity.x * (dt - extra_time) / 2f32;
                 self.new_state.rect.x += self.new_state.velocity.x * extra_time;
-                self.new_state.rect.x = self.new_state.rect.x.min(800f32 - self.cur_state.rect.w).max(0f32);
+                self.new_state.rect.x = self
+                    .new_state
+                    .rect
+                    .x
+                    .min(800f32 - self.cur_state.rect.w)
+                    .max(0f32);
                 return;
             }
         }
         // Accurately process acceleration (S is area below V(t))
-        self.new_state.rect.x += (self.cur_state.velocity.x + self.new_state.velocity.x) * dt / 2f32;
-        self.new_state.rect.x = self.new_state.rect.x.min(800f32 - self.cur_state.rect.w).max(0f32);
+        self.new_state.rect.x +=
+            (self.cur_state.velocity.x + self.new_state.velocity.x) * dt / 2f32;
+        self.new_state.rect.x = self
+            .new_state
+            .rect
+            .x
+            .min(800f32 - self.cur_state.rect.w)
+            .max(0f32);
         // self.new_state.rect.y += self.cur_state.velocity.y * dt / 2f32;
     }
 
@@ -171,14 +189,16 @@ impl Entity for Paddle {
         if inter.w == inter.h {
             ball.cur_state.velocity.x *= -1f32;
             ball.cur_state.velocity.y *= -1f32;
-        }
-        else if inter.w > inter.h {
+        } else if inter.w > inter.h {
             ball.cur_state.velocity.y *= -1f32;
-        }
-        else {
+        } else {
             ball.cur_state.velocity.x *= -1f32;
         }
         ball.cur_state.velocity.x += self.cur_state.velocity.x / 7f32;
+    }
+
+    unsafe fn dist(&mut self, ball: &Ball) -> f32 {
+        ball.new_state.rect.distance(&self.new_state.rect)
     }
 }
 
@@ -186,13 +206,13 @@ impl Entity for Paddle {
 struct BallState {
     rect: Rect,
     velocity: Point,
-    hp: i32
+    hp: i32,
 }
 
 #[derive(Debug, Default, Clone, Copy)]
 struct Ball {
     cur_state: BallState,
-    new_state: BallState
+    new_state: BallState,
 }
 
 impl Ball {
@@ -214,7 +234,7 @@ impl Ball {
 pub struct SceneGame {
     bricks: [Brick; TOTAL_BRICKS as usize],
     paddle: Paddle,
-    ball: Ball
+    ball: Ball,
 }
 
 impl SceneGame {
@@ -233,17 +253,27 @@ impl SceneGame {
             hp -= 1;
         }
         self.bricks[(BRICK_COLS * BRICK_ROWS) as usize].cur_state.hp = 999;
-        self.bricks[(BRICK_COLS * BRICK_ROWS + 1) as usize].cur_state.hp = 999;
-        self.bricks[(BRICK_COLS * BRICK_ROWS + 2) as usize].cur_state.hp = 999;
-        self.bricks[(BRICK_COLS * BRICK_ROWS + 3) as usize].cur_state.hp = 999;
+        self.bricks[(BRICK_COLS * BRICK_ROWS + 1) as usize]
+            .cur_state
+            .hp = 999;
+        self.bricks[(BRICK_COLS * BRICK_ROWS + 2) as usize]
+            .cur_state
+            .hp = 999;
+        self.bricks[(BRICK_COLS * BRICK_ROWS + 3) as usize]
+            .cur_state
+            .hp = 999;
         // top
-        self.bricks[(BRICK_COLS * BRICK_ROWS) as usize].rect = Rect::new(-100f32, -100f32, 1000f32, 100f32);
+        self.bricks[(BRICK_COLS * BRICK_ROWS) as usize].rect =
+            Rect::new(-100f32, -100f32, 1000f32, 100f32);
         // left
-        self.bricks[(BRICK_COLS * BRICK_ROWS + 1) as usize].rect = Rect::new(-100f32, -100f32, 100f32, 800f32);
+        self.bricks[(BRICK_COLS * BRICK_ROWS + 1) as usize].rect =
+            Rect::new(-100f32, -100f32, 100f32, 800f32);
         // right
-        self.bricks[(BRICK_COLS * BRICK_ROWS + 2) as usize].rect = Rect::new(800f32, -100f32, 100f32, 800f32);
+        self.bricks[(BRICK_COLS * BRICK_ROWS + 2) as usize].rect =
+            Rect::new(800f32, -100f32, 100f32, 800f32);
         // bottom (deadly)
-        self.bricks[(BRICK_COLS * BRICK_ROWS + 3) as usize].rect = Rect::new(-100f32, 600f32, 1000f32, 100f32);
+        self.bricks[(BRICK_COLS * BRICK_ROWS + 3) as usize].rect =
+            Rect::new(-100f32, 600f32, 1000f32, 100f32);
         self.reset_attempt();
         self.ball.cur_state.hp = 3;
     }
@@ -263,22 +293,23 @@ impl SceneGame {
         let prev_hp = self.ball.cur_state.hp;
         while dt_left > 0f32 {
             // Earliest possible collision time (min_col_t = dt_left means no collision)
-            let mut min_col_t = dt_left;
+            let mut min_col_t;
             // Dummy value
-            let mut col_obj: *mut dyn Entity = &mut self.paddle as *mut dyn Entity;
+            let mut col_obj: *mut dyn Entity;
             // Try to move objects
             self.ball.do_move(dt_left);
             self.paddle.do_move(dt_left);
-            if self.paddle.collides(&self.ball) {
-                // Collision with paddle, ofc it's the earliest time
-                min_col_t = SceneGame::find_collision_time(&mut self.ball, &mut self.paddle, dt_left);
+            {
+                // If this is a aollision with paddle, ofc it's the earliest time
+                min_col_t =
+                    SceneGame::find_collision_time(&mut self.ball, &mut self.paddle, dt_left);
                 col_obj = &mut self.paddle;
             }
             for brick in self.bricks.iter_mut() {
                 done &= brick.is_dead();
                 brick.do_move(dt_left);
-                if brick.collides(&self.ball) {
-                    // Collision, maybe that one was earlier?
+                {
+                    // If this is a collision, maybe that one was earlier?
                     let col_t = SceneGame::find_collision_time(&mut self.ball, brick, dt_left);
                     if col_t < min_col_t {
                         min_col_t = col_t;
@@ -302,8 +333,7 @@ impl SceneGame {
                 col_obj.hit(&mut self.ball);
                 // Process remaining dt_left again
                 dt_left -= min_col_t;
-            }
-            else {
+            } else {
                 break;
             }
         }
@@ -322,14 +352,24 @@ impl SceneGame {
             // Ball died
             if self.ball.cur_state.hp == 0 {
                 app::run_scene(scene_base::SceneBase::new_menu());
-            }
-            else {
+            } else {
                 self.reset_attempt();
             }
         }
     }
 
     unsafe fn find_collision_time(ball: &mut Ball, obj: &mut dyn Entity, dt: f32) -> f32 {
+        if !obj.collides(ball) {
+            // Ctrl+C, Ctrl+V softlock check
+            ball.do_move(0f32);
+            obj.do_move(0f32);
+            if obj.collides(&ball) {
+                ball.do_move(dt);
+                obj.do_move(dt);
+                return dt;
+            }
+            return SceneGame::find_deep_collision_time(ball, obj, dt);
+        }
         /*
         time = 0 <=> No Collision
         time = dt <=> Collision
@@ -351,8 +391,7 @@ impl SceneGame {
             obj.do_move(center);
             if obj.collides(&ball) {
                 right = center;
-            }
-            else {
+            } else {
                 left = center;
             }
         }
@@ -361,6 +400,46 @@ impl SceneGame {
         obj.do_move(dt);
         // Return earliest possible collision time so we will be able to find collision side for inverting ball
         right
+    }
+
+    unsafe fn find_deep_collision_time(ball: &mut Ball, obj: &mut dyn Entity, dt: f32) -> f32 {
+        if !(SceneGame::find_distance_delta(ball, obj, 0f32) < 0f32
+            && SceneGame::find_distance_delta(ball, obj, dt) >= 0f32)
+        {
+            ball.do_move(dt);
+            obj.do_move(dt);
+            return dt;
+        }
+        // Check only if distance was getting smaller and then bigger <=>
+        // <=> Propably there was collision on the smallest distance
+        let mut left = 0f32;
+        let mut right = dt;
+        while (right - left) > core::f32::EPSILON {
+            let center = (left + right) / 2f32;
+            if SceneGame::find_distance_delta(ball, obj, center) >= 0f32 {
+                right = center;
+            } else {
+                left = center;
+            }
+        }
+        let has_collision = obj.collides(ball);
+        ball.do_move(dt);
+        obj.do_move(dt);
+        if has_collision {
+            // info!("Found collision between %f: %f", dt as f64, right as f64);
+            return right;
+        }
+        dt
+    }
+
+    unsafe fn find_distance_delta(ball: &mut Ball, obj: &mut dyn Entity, dt: f32) -> f32 {
+        let adv_dt = dt + core::f32::EPSILON;
+        ball.do_move(adv_dt);
+        obj.do_move(adv_dt);
+        let new_dist = obj.dist(ball);
+        ball.do_move(dt);
+        obj.do_move(dt);
+        new_dist - obj.dist(ball)
     }
 
     pub unsafe fn draw(&mut self) {
@@ -372,7 +451,7 @@ impl SceneGame {
         self.paddle.draw();
         for i in 0..self.ball.cur_state.hp {
             ldr::get_tex(4).draw(&Point::new(MARGIN + (i * 34) as f32, 10f32));
-        }        
+        }
         self.ball.draw();
         ren::present();
     }
@@ -387,17 +466,22 @@ impl SceneGame {
     pub unsafe fn event(&mut self, ev: Event) {
         match ev {
             Event::Space => {
-                if self.ball.cur_state.velocity.x == 0f32 && self.ball.cur_state.velocity.y == 0f32 {
-                    self.ball.cur_state.velocity.x = if sdl3_sys::stdinc::SDL_rand(2) == 1 { DEF_SPEED } else { -DEF_SPEED };
+                if self.ball.cur_state.velocity.x == 0f32 && self.ball.cur_state.velocity.y == 0f32
+                {
+                    self.ball.cur_state.velocity.x = if sdl3_sys::stdinc::SDL_rand(2) == 1 {
+                        DEF_SPEED
+                    } else {
+                        -DEF_SPEED
+                    };
                     self.ball.cur_state.velocity.y = DEF_SPEED;
                 }
-            },
+            }
             Event::LeftDown | Event::RightUp => {
                 self.paddle.holding -= 1;
-            },
+            }
             Event::LeftUp | Event::RightDown => {
                 self.paddle.holding += 1;
-            },
+            }
             Event::C => {
                 // Cheat (cuz me noob)
                 self.ball.cur_state.hp = 20;
@@ -412,7 +496,7 @@ impl Default for SceneGame {
         SceneGame {
             bricks: [Default::default(); TOTAL_BRICKS as usize],
             paddle: Default::default(),
-            ball: Default::default()
+            ball: Default::default(),
         }
     }
 }

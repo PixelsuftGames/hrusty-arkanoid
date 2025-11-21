@@ -1,6 +1,6 @@
+use crate::{col::Color, deb, error, fatal, hrust::last_error, rect::Point, surf, warn, win};
 use core::ffi::c_void;
 use sdl3_sys::{properties, render, surface};
-use crate::{col::Color, deb, error, fatal, hrust::last_error, rect::Point, surf, warn, win};
 
 pub static mut handle: *mut render::SDL_Renderer = core::ptr::null_mut();
 
@@ -8,7 +8,9 @@ pub struct RenContext {}
 
 impl Drop for RenContext {
     fn drop(&mut self) {
-        unsafe { render::SDL_DestroyRenderer(handle); };
+        unsafe {
+            render::SDL_DestroyRenderer(handle);
+        };
         deb!("Renderer destroyed");
     }
 }
@@ -16,7 +18,7 @@ impl Drop for RenContext {
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Tex {
     pub handle: *mut render::SDL_Texture,
-    pub size: Point
+    pub size: Point,
 }
 
 impl Tex {
@@ -28,7 +30,7 @@ impl Tex {
         }
         Tex {
             handle: ret,
-            size: Point::new((*s.handle).w as f32, (*s.handle).h as f32)
+            size: Point::new((*s.handle).w as f32, (*s.handle).h as f32),
         }
     }
 
@@ -39,13 +41,22 @@ impl Tex {
         dst_rect.w = self.size.x;
         dst_rect.h = self.size.y;
         render::SDL_RenderTexture(
-            handle, self.handle,
-            core::ptr::null(), &dst_rect as *const sdl3_sys::rect::SDL_FRect
+            handle,
+            self.handle,
+            core::ptr::null(),
+            &dst_rect as *const sdl3_sys::rect::SDL_FRect,
         );
     }
 
     pub unsafe fn pixelate(&mut self, should_pixelate: bool) {
-        if !render::SDL_SetTextureScaleMode(self.handle, if should_pixelate { surface::SDL_SCALEMODE_NEAREST } else { surface::SDL_SCALEMODE_LINEAR }) {
+        if !render::SDL_SetTextureScaleMode(
+            self.handle,
+            if should_pixelate {
+                surface::SDL_SCALEMODE_NEAREST
+            } else {
+                surface::SDL_SCALEMODE_LINEAR
+            },
+        ) {
             warn!("Failed to apply texture scale mode (%s)", last_error());
         }
     }
@@ -73,8 +84,16 @@ impl Tex {
 
 pub unsafe fn create() -> Option<RenContext> {
     let props = properties::SDL_CreateProperties();
-    properties::SDL_SetPointerProperty(props, render::SDL_PROP_RENDERER_CREATE_WINDOW_POINTER, win::handle as *mut c_void);
-    properties::SDL_SetNumberProperty(props, render::SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER, 1);
+    properties::SDL_SetPointerProperty(
+        props,
+        render::SDL_PROP_RENDERER_CREATE_WINDOW_POINTER,
+        win::handle as *mut c_void,
+    );
+    properties::SDL_SetNumberProperty(
+        props,
+        render::SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER,
+        1,
+    );
     // properties::SDL_SetStringProperty(props, render::SDL_PROP_RENDERER_CREATE_NAME_STRING, cs!("direct3d"));
     handle = render::SDL_CreateRendererWithProperties(props);
     if handle.is_null() {

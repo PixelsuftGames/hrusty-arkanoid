@@ -2,7 +2,7 @@ use sdl3_sys::surface;
 
 #[derive(Clone)]
 pub struct Surface {
-    pub handle: *mut surface::SDL_Surface
+    pub handle: *mut surface::SDL_Surface,
 }
 
 impl Surface {

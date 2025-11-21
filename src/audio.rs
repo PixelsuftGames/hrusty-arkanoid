@@ -13,7 +13,9 @@ pub struct AudioContext {}
 
 impl Drop for AudioContext {
     fn drop(&mut self) {
-        unsafe { audio_destroy(); }
+        unsafe {
+            audio_destroy();
+        }
     }
 }
 

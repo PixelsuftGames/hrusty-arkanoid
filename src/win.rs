@@ -1,5 +1,5 @@
-use sdl3_sys::{video};
 use crate::{cs, deb, fatal, hrust::last_error, ldr, warn};
+use sdl3_sys::video;
 
 pub static mut handle: *mut video::SDL_Window = core::ptr::null_mut();
 
@@ -7,15 +7,21 @@ pub struct WinContext {}
 
 impl Drop for WinContext {
     fn drop(&mut self) {
-        unsafe { video::SDL_DestroyWindow(handle); };
+        unsafe {
+            video::SDL_DestroyWindow(handle);
+        };
         deb!("Window destroyed");
     }
 }
 
 pub unsafe fn create() -> Option<WinContext> {
     handle = video::SDL_CreateWindow(
-        cs!("Hrusty Window"), 1024, 768,
-        video::SDL_WINDOW_HIGH_PIXEL_DENSITY | video::SDL_WINDOW_RESIZABLE | video::SDL_WINDOW_HIDDEN
+        cs!("Hrusty Window"),
+        1024,
+        768,
+        video::SDL_WINDOW_HIGH_PIXEL_DENSITY
+            | video::SDL_WINDOW_RESIZABLE
+            | video::SDL_WINDOW_HIDDEN,
     );
     if handle.is_null() {
         fatal!("Failed to create window (%s)", last_error());
@@ -32,9 +38,17 @@ pub unsafe fn create() -> Option<WinContext> {
 }
 
 pub unsafe fn set_shown(show: bool) {
-    let ret = if show { video::SDL_ShowWindow(handle) } else { video::SDL_HideWindow(handle) };
+    let ret = if show {
+        video::SDL_ShowWindow(handle)
+    } else {
+        video::SDL_HideWindow(handle)
+    };
     if !ret {
-        warn!("Failed to set window %s (%s)", if show { cs!("shown") } else { cs!("hidden") }, last_error());
+        warn!(
+            "Failed to set window %s (%s)",
+            if show { cs!("shown") } else { cs!("hidden") },
+            last_error()
+        );
     }
 }
 

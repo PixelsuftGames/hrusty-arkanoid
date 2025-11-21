@@ -1,11 +1,15 @@
-use crate::{audio, clock, cs, hrust, ldr, ren, scene_base::{self, Event, SceneBase}, win};
+use crate::{
+    audio, clock, cs, hrust, ldr, ren,
+    scene_base::{self, Event, SceneBase},
+    win,
+};
 use sdl3_sys::{events, scancode, stdinc, timer};
 
 pub struct App {
     clock: clock::Clock,
     scene: scene_base::SceneBase,
     loader: ldr::Loader,
-    running: bool
+    running: bool,
 }
 
 static mut handle: *mut App = core::ptr::null_mut();
@@ -53,10 +57,10 @@ pub unsafe fn run() {
             match events::SDL_EventType(ev.r#type) {
                 events::SDL_EVENT_QUIT => {
                     a().running = false;
-                },
+                }
                 events::SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED => {
                     ren::update_scale();
-                },
+                }
                 events::SDL_EVENT_KEY_DOWN | events::SDL_EVENT_KEY_UP => {
                     if ev.key.down && ev.key.repeat {
                         break;
@@ -64,51 +68,61 @@ pub unsafe fn run() {
                     match ev.key.scancode {
                         scancode::SDL_SCANCODE_A | scancode::SDL_SCANCODE_LEFT => {
                             // Move
-                            a().scene.event(if ev.key.down { Event::LeftDown } else { Event::LeftUp });
-                        },
+                            a().scene.event(if ev.key.down {
+                                Event::LeftDown
+                            } else {
+                                Event::LeftUp
+                            });
+                        }
                         scancode::SDL_SCANCODE_D | scancode::SDL_SCANCODE_RIGHT => {
                             // Move
-                            a().scene.event(if ev.key.down { Event::RightDown } else { Event::RightUp });
-                        },
+                            a().scene.event(if ev.key.down {
+                                Event::RightDown
+                            } else {
+                                Event::RightUp
+                            });
+                        }
                         scancode::SDL_SCANCODE_C => {
                             // Cheat
                             if ev.key.down {
                                 a().scene.event(Event::C);
                             }
-                        },
+                        }
                         scancode::SDL_SCANCODE_R => {
                             // Reset
                             if ev.key.down {
                                 a().scene.init();
                             }
-                        },
-                        scancode::SDL_SCANCODE_SPACE | scancode::SDL_SCANCODE_RETURN | scancode::SDL_SCANCODE_RETURN2 => {
+                        }
+                        scancode::SDL_SCANCODE_SPACE
+                        | scancode::SDL_SCANCODE_RETURN
+                        | scancode::SDL_SCANCODE_RETURN2 => {
                             if ev.key.down {
                                 a().scene.event(Event::Space);
                             }
-                        },
+                        }
                         scancode::SDL_SCANCODE_V => {
                             // Toggle VSync
                             if ev.key.down {
                                 ren::toggle_vsync();
                             }
-                        },
+                        }
                         scancode::SDL_SCANCODE_ESCAPE => {
                             // Go back
                             if ev.key.down {
                                 match &a().scene {
                                     SceneBase::Menu(_) => {
                                         a().running = false;
-                                    },
+                                    }
                                     SceneBase::Game(_) => {
                                         run_scene(scene_base::SceneBase::new_menu());
                                     }
                                 }
                             }
-                        },
+                        }
                         _ => {}
                     }
-                },
+                }
                 _ => {}
             }
         }
@@ -125,13 +139,16 @@ pub unsafe fn run() {
             fps_buf[2] = 'S' as i8;
             fps_buf[3] = ':' as i8;
             fps_buf[4] = ' ' as i8;
-            stdinc::SDL_itoa(a().clock.get_fps(), fps_buf.as_mut_ptr().wrapping_add(5), 10);
+            stdinc::SDL_itoa(
+                a().clock.get_fps(),
+                fps_buf.as_mut_ptr().wrapping_add(5),
+                10,
+            );
             win::set_title(fps_buf.as_ptr());
-        }
-        else {
+        } else {
             win::set_title(cs!("Arkanoid"));
         }
         update();
         draw();
-    }    
+    }
 }

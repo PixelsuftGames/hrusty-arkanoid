@@ -1,5 +1,5 @@
-use sdl3_sys::{init, error};
 use crate::{deb, fatal};
+use sdl3_sys::{error, init};
 
 pub struct CoreContext {}
 

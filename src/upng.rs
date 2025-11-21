@@ -47,7 +47,10 @@ pub const UPNG_ERROR: upng_state = -1;
 pub type upng_t = ffi::c_void;
 
 unsafe extern "C" {
-    pub unsafe fn upng_new_from_bytes(buffer: *const ffi::c_uchar, size: ffi::c_ulong) -> *mut upng_t;
+    pub unsafe fn upng_new_from_bytes(
+        buffer: *const ffi::c_uchar,
+        size: ffi::c_ulong,
+    ) -> *mut upng_t;
     pub unsafe fn upng_free(handle: *mut upng_t);
     pub unsafe fn upng_decode(upng: *mut upng_t) -> upng_error;
     pub unsafe fn upng_get_components(upng: *const upng_t) -> ffi::c_uint;

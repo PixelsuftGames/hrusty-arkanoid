@@ -6,12 +6,12 @@ pub enum Event {
     RightDown,
     RightUp,
     Space,
-    C
+    C,
 }
 
 pub enum SceneBase {
     Game(scene_game::SceneGame),
-    Menu(scene_menu::SceneMenu)
+    Menu(scene_menu::SceneMenu),
 }
 
 impl SceneBase {
@@ -37,21 +37,21 @@ impl SceneBase {
     pub unsafe fn update(&mut self, dt: f32) {
         match self {
             SceneBase::Game(sc) => sc.update(dt),
-            SceneBase::Menu(sc) => sc.update(dt)
+            SceneBase::Menu(sc) => sc.update(dt),
         }
     }
 
     pub unsafe fn draw(&mut self) {
         match self {
             SceneBase::Game(sc) => sc.draw(),
-            SceneBase::Menu(sc) => sc.draw()
+            SceneBase::Menu(sc) => sc.draw(),
         }
     }
 
     pub unsafe fn event(&mut self, ev: Event) {
         match self {
             SceneBase::Game(sc) => sc.event(ev),
-            SceneBase::Menu(sc) => sc.event(ev)
+            SceneBase::Menu(sc) => sc.event(ev),
         }
     }
 }

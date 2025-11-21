@@ -1,8 +1,15 @@
-use crate::{app, col::Color, ldr, rect::Point, ren, scene_base::{Event, SceneBase}};
+use crate::{
+    app,
+    col::Color,
+    ldr,
+    rect::Point,
+    ren,
+    scene_base::{Event, SceneBase},
+};
 
 #[derive(Debug, Default)]
 pub struct SceneMenu {
-    space_timer: f32
+    space_timer: f32,
 }
 
 impl SceneMenu {
@@ -30,7 +37,7 @@ impl SceneMenu {
         match ev {
             Event::Space => {
                 app::run_scene(SceneBase::new_game());
-            },
+            }
             _ => {}
         }
     }

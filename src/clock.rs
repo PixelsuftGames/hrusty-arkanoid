@@ -3,7 +3,7 @@ use sdl3_sys::timer;
 #[derive(Clone, Copy, Debug)]
 pub enum ClockType {
     TM, // Default Timer
-    PC // Performance Counter
+    PC, // Performance Counter
 }
 
 pub struct Clock {
@@ -11,7 +11,7 @@ pub struct Clock {
     freq: f64,
     last_tick: u64,
     double_dt: f64,
-    tp: ClockType
+    tp: ClockType,
 }
 
 impl Clock {
@@ -21,7 +21,7 @@ impl Clock {
             freq: 0f64,
             last_tick: 0u64,
             double_dt: 0f64,
-            tp: tp
+            tp: tp,
         }
     }
 
@@ -30,7 +30,7 @@ impl Clock {
             ClockType::TM => {
                 self.freq = 1000f64;
                 self.last_tick = timer::SDL_GetTicks();
-            },
+            }
             ClockType::PC => {
                 self.freq = timer::SDL_GetPerformanceFrequency() as f64;
                 self.last_tick = timer::SDL_GetPerformanceCounter();
@@ -39,9 +39,9 @@ impl Clock {
     }
 
     pub unsafe fn update(&mut self) {
-        let now =  match self.tp {
+        let now = match self.tp {
             ClockType::TM => timer::SDL_GetTicks(),
-            ClockType::PC => timer::SDL_GetPerformanceCounter()
+            ClockType::PC => timer::SDL_GetPerformanceCounter(),
         };
         self.double_dt = (now - self.last_tick) as f64 / self.freq;
         self.last_tick = now;
